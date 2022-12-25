@@ -1,0 +1,11 @@
+# VEML7700 Ambient Light Sensor configuration options
+
+# Copyright (c) 2021 Farit N
+# SPDX-License-Identifier: Apache-2.0
+
+menuconfig VEML7700
+    bool "VEML7700 Ambient Light Sensor"
+    depends on I2C
+    help
+      Enable driver for VEML7700 sensors.
+

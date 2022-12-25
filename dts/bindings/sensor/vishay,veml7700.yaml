@@ -1,0 +1,75 @@
+# Copyright (c) 2021 Farit N
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+    VEML7700 High Accuracy Ambient Light Sensor With I2C Interface.
+    The datasheet: https://www.vishay.com/docs/84286/veml7700.pdf
+
+compatible: "vishay,veml7700"
+
+include: i2c-device.yaml
+
+properties:
+    als-gain:
+      type: int
+      required: true
+      default: 0x02
+      description: ALS gain selection. |
+        0x00 = ALS gain x 1
+        0x01 = ALS gain x 2
+        0x02 = ALS gain x (1/8)
+        0x03 = ALS gain x (1/4)
+      enum:
+        - 0x00
+        - 0x01
+        - 0x02
+        - 0x03
+
+    als-it:
+      type: int
+      required: true
+      default: 0x00
+      description: ALS integration time |
+        0x0c = 25 ms
+        0x08 = 50 ms
+        0x00 = 100 ms
+        0x01 = 200 ms
+        0x02 = 400 ms
+        0x03 = 800 ms
+      enum:
+        - 0x0c
+        - 0x08
+        - 0x00
+        - 0x01
+        - 0x02
+        - 0x03
+
+    als-pers:
+      type: int
+      required: true
+      default: 0x00
+      description: ALS persistence protect number |
+        0x00 = 1
+        0x01 = 2
+        0x02 = 4
+        0x03 = 8
+      enum:
+        - 0x00
+        - 0x01
+        - 0x02
+        - 0x03
+
+    psm:
+      type: int
+      required: true
+      default: 0x00
+      description: Power saving mode |
+        0x00 = mode 1 
+        0x01 = mode 2 
+        0x02 = mode 3 
+        0x03 = mode 4
+      enum:
+        - 0x00
+        - 0x01
+        - 0x02
+        - 0x03

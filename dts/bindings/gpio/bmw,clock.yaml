@@ -1,0 +1,38 @@
+# Copyright (c) 2021, Farit N
+# SPDX-License-Identifier: Apache-2.0
+
+description: The BMW E30 6-button clock
+
+compatible: "bmw,clock"
+
+include: base.yaml
+
+properties:
+    label:
+      required: true
+
+    background-gpios:
+      type: phandle-array
+      required: true
+      description: The GPIO pin that enables the background light. Active low.
+
+    enable-format-gpios:
+      type: phandle-array
+      required: true
+      description: The GPIO pin that enables clock format (Celcius/Fahrenheit and 12/24 hour) setting reading. Active how.
+
+    fahrenheit12-gpios:
+      type: phandle-array
+      required: true
+      description: The GPIO pin that sets the temperature in Fahrenheit and 12 hour clock
+
+    celsius12-gpios:
+      type: phandle-array
+      required: true
+      description: The GPIO pin that sets the temperature in Celsius and 12 hour clock
+
+    celsius24-gpios:
+      type: phandle-array
+      required: true
+      description: The GPIO pin that sets the temperature in Celsius and 24 hour clock
+

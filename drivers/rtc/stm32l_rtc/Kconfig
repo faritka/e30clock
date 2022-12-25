@@ -1,0 +1,48 @@
+# Copyright (c) 2022 Farit N
+# SPDX-License-Identifier: Apache-2.0
+
+config STM32L_RTC
+    bool "STM32L RTC"
+    depends on SOC_FAMILY_STM32
+    select USE_STM32_LL_BUS
+    select USE_STM32_LL_PWR
+    select USE_STM32_LL_RTC
+    select USE_STM32_LL_RCC
+    help
+      Enable STM32L RTC
+
+if STM32L_RTC
+
+choice STM32L_RTC_LSE_DRIVE
+    prompt "LSE oscillator drive capability"
+
+config STM32L_RTC_LSE_DRIVE_LOW
+    bool "Low"
+    help
+      Xtal mode lower driving capability, for 6 pF crystals
+
+config STM32L_RTC_LSE_DRIVE_MEDIUMLOW
+    bool "Medium Low"
+    help
+      Xtal mode medium low driving capability
+
+config STM32L_RTC_LSE_DRIVE_MEDIUMHIGH
+    bool "Medium High"
+    help
+      Xtal mode medium high driving capability
+
+config STM32L_RTC_LSE_DRIVE_HIGH
+    bool "High"
+    help
+      Xtal mode higher driving capability, for 12.5 pF crystals
+
+endchoice
+
+config STM32L_RTC_LSE_DRIVE_STRENGTH
+    hex
+    default 0x00000000 if STM32L_RTC_LSE_DRIVE_LOW
+    default 0x00000008 if STM32L_RTC_LSE_DRIVE_MEDIUMLOW
+    default 0x00000010 if STM32L_RTC_LSE_DRIVE_MEDIUMHIGH
+    default 0x00000018 if STM32L_RTC_LSE_DRIVE_HIGH
+
+endif # STM32L_RTC

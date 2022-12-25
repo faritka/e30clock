@@ -1,0 +1,21 @@
+# Copyright (c) 2021, Farit N
+# SPDX-License-Identifier: Apache-2.0
+
+description: ADC thermometer for BMW E30
+
+compatible: "bmw,thermometer"
+
+include: base.yaml
+
+properties:
+    label:
+      required: true
+
+    io-channels:
+      required: true
+      description: ADC channel for temperature sensor
+
+    enable-gpios:
+      type: phandle-array
+      required: true
+      description: The GPIO pin that enables the thermometer. Active low.

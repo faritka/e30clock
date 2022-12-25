@@ -1,0 +1,9 @@
+# Copyright (c) 2021 Farit N
+# SPDX-License-Identifier: Apache-2.0
+
+description:  STM32L RTC
+
+compatible: "st,stm32lrtc"
+
+include: rtc.yaml
+

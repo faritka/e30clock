@@ -1,0 +1,59 @@
+# Copyright (c) 2021 Farit N
+# SPDX-License-Identifier: Apache-2.0
+
+description:  Micro Crystal RV-3032-C7
+
+compatible: "microcrystal,rv3032"
+
+include: base.yaml
+include: i2c-device.yaml
+
+properties:
+
+    int-gpios:
+      type: phandle-array
+      required: true
+      description: The GPIO that receives interrupts from RV-3032
+
+    nclke:
+      type: int
+      required: false
+      default: 0x01
+      description: The CLKOUT output enable bit, 0 - enabled, 1 - disabled
+
+    bsm:
+      type: int
+      required: false
+      default: 0x00
+      description: |
+        Backup power switchover modes:
+        0x00: Switchover disabled 
+        0x01: Direct Switching Mode (DSM)
+        0x02: Level Switching Mode (LSM)
+        0x03: Switchover disabled
+
+    tcm:
+      type: int
+      required: false
+      default: 0x00
+      description: |
+        Trickle Charger with Charge Pump 
+        0x00: Trickle Charger off 
+        0x01: 1.75 V
+        0x02: 3.0 V
+        0x03: 4.4 V
+
+    tcr:
+      type: int
+      required: false
+      default: 0x00
+      description: |
+        Series current limiting resistor for the trickle charger
+        0x00: 1 kΩ
+        0x01: 2 kΩ
+        0x02: 7 kΩ
+        0x03: 11 kΩ
+
+
+
+

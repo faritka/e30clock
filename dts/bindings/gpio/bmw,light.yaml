@@ -1,0 +1,17 @@
+# Copyright (c) 2021, Farit N
+# SPDX-License-Identifier: Apache-2.0
+
+description: The information cluster background light sensor for the BMW E30
+
+compatible: "bmw,light"
+
+include: base.yaml
+
+properties:
+    label:
+      required: true
+
+    gpios:
+      type: phandle-array
+      required: true
+      description: The GPIO pin that enables the background light. Active low.

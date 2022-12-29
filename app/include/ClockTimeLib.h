@@ -6,7 +6,7 @@
 #define __CLOCK_TIMELIB_H
 
 #include <time.h>
-#include <sys/printk.h>
+#include <zephyr/sys/printk.h>
 
 
 class ClockTimeLib 

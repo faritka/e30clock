@@ -5,13 +5,13 @@
 #ifndef __CLOCK_TEMPERATURE_H
 #define __CLOCK_TEMPERATURE_H
 
-#include <sys/printk.h>
+#include <zephyr/sys/printk.h>
 
-#include <device.h>
-#include <devicetree.h>
+#include <zephyr/device.h>
+#include <zephyr/devicetree.h>
 
-#include <drivers/adc.h>
-#include <drivers/gpio.h>
+#include <zephyr/drivers/adc.h>
+#include <zephyr/drivers/gpio.h>
 
 #include <stdlib.h>
 

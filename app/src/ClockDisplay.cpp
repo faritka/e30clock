@@ -19,7 +19,8 @@ ClockDisplay::ClockDisplay(ClockSettings *clockSettings, ClockTime *clockTime, C
     //the default mode is time
     setMode(ClockDisplay::modeTime);
 
-    display = device_get_binding(DT_LABEL(DT_INST(0, holtek_ht1632c)));
+    //display = device_get_binding(DT_LABEL(DT_INST(0, holtek_ht1632c)));
+    display = DEVICE_DT_GET(DT_COMPAT_GET_ANY_STATUS_OKAY(holtek_ht1632c));
 
     if (display == NULL) {
         printk("Device HT1632C not found.\n");
@@ -27,8 +28,8 @@ ClockDisplay::ClockDisplay(ClockSettings *clockSettings, ClockTime *clockTime, C
     }
 
     display_get_capabilities(display, &capabilities);
-    printk("Display width %d", capabilities.x_resolution);
-    printk("Display height %d", capabilities.y_resolution);
+    printk("Display width %d\n", capabilities.x_resolution);
+    printk("Display height %d\n", capabilities.y_resolution);
 
     //32 rows of 8-bit or 24 rows of 16-bit
     bufDesc.buf_size = displayWidth * capabilities.y_resolution;
@@ -59,7 +60,7 @@ void ClockDisplay::show(bool showTitle)
             hour = ((hour == 0) ? 12 : hour);
         }
 
-        sprintf(displayStr, "%2u:%02u", hour, clockTime->getMinute());
+        sprintf(displayStr, "%2hu:%02hu", hour % 24, clockTime->getMinute() % 60);
 
         drawString(displayStr);
     } else if (mode == modeDate) {
@@ -164,7 +165,7 @@ void ClockDisplay::show(bool showTitle)
 
         printk("Offset: %d\n", offset);
 
-        sprintf(displayStr, "%+.2d.%.2u", offset/60, abs(offset)%60);
+        sprintf(displayStr, "%+.2hd.%.2hu", offset/60, abs(offset)%60);
         printk("displayStr: %s\n", displayStr);
         drawString(displayStr);
     } else if (mode == modeStdWeek) {
@@ -210,7 +211,7 @@ void ClockDisplay::show(bool showTitle)
 
         printk("Offset: %d\n", offset);
 
-        sprintf(displayStr, "%+.2d.%.2u", offset/60, abs(offset)%60);
+        sprintf(displayStr, "%+.2hd.%.2hu", offset/60, abs(offset)%60);
         printk("displayStr: %s\n", displayStr);
         drawString(displayStr);
     } else if (mode == modeHourlyAlarm) {
@@ -230,14 +231,14 @@ void ClockDisplay::show(bool showTitle)
         drawString(displayStr);
     } else if (mode == modeCorrectionOffset) {
         if (showTitle) {
-            drawStringScrolling("Time Correction Offset");
+            drawStringScrolling("Time Correction Offset (+ faster or - slower)");
         }
 
         clearScreen();
 
         int8_t offset = clockTime->getCorrectionOffset();
 
-        printk("Time Correction Offset (faster or slower): %d\n", offset);
+        printk("Time Correction Offset (+ faster or - slower): %d\n", offset);
 
         sprintf(displayStr, "%+.2d", offset);
         printk("displayStr: %s\n", displayStr);

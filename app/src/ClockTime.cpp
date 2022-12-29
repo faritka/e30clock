@@ -21,7 +21,8 @@ ClockTime::ClockTime(ClockSettings *clockSettings)
     this->clockSettings = clockSettings;
 
     printk("\nget device rv_3032\n");
-    rtc = device_get_binding(DT_LABEL(DT_INST(0, microcrystal_rv3032)));
+    //rtc = device_get_binding(DT_LABEL(DT_INST(0, microcrystal_rv3032)));
+    rtc = DEVICE_DT_GET(DT_COMPAT_GET_ANY_STATUS_OKAY(microcrystal_rv3032));
     
     if (!rtc) {
         printk("Device Microcrystal_rv3032 not found.\n");

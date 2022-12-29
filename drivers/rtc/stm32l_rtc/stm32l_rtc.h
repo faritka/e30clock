@@ -8,14 +8,14 @@
 
 #define DT_DRV_COMPAT st_stm32lrtc
 
-#include <zephyr.h>
+#include <zephyr/kernel.h>
 #include <time.h>
-#include <device.h>
-#include <pm/device.h>
-#include <sys/printk.h>
+#include <zephyr/device.h>
+#include <zephyr/pm/device.h>
+#include <zephyr/sys/printk.h>
 #include <soc.h>
 
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(stm32lrtc, CONFIG_KERNEL_LOG_LEVEL);
 
 #include <stm32_ll_bus.h>

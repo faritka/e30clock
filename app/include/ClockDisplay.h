@@ -5,12 +5,12 @@
 #ifndef __CLOCK_DISPLAY_H
 #define __CLOCK_DISPLAY_H
 
-#include <sys/printk.h>
+#include <zephyr/sys/printk.h>
 
-#include <device.h>
-#include <devicetree.h>
-#include <drivers/display.h>
-#include <drivers/gpio.h>
+#include <zephyr/device.h>
+#include <zephyr/devicetree.h>
+#include <zephyr/drivers/display.h>
+#include <zephyr/drivers/gpio.h>
 #include <time.h>
 
 #include <stdio.h>

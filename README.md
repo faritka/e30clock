@@ -30,7 +30,7 @@ environment. You can follow the official
 
 ### Documentation
 
-[BMW E30 clock for Zephyr RTOS and STM32](http://hobby.farit.ru/ht1632-driver-rtos-zephyr-nucleo-stm32/).
+[BMW E30 clock for Zephyr RTOS and STM32](http://hobby.farit.ru/bmw-e30-clock-zephyr-stm32/).
 
 ### Initialization
 

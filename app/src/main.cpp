@@ -3,26 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <zephyr.h>
+#include <zephyr/kernel.h>
 
 #include "app_version.h"
 
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
 
-#include <device.h>
-#include <devicetree.h>
-#include <drivers/gpio.h>
-#include <drivers/display.h>
+#include <zephyr/device.h>
+#include <zephyr/devicetree.h>
+#include <zephyr/drivers/gpio.h>
+#include <zephyr/drivers/display.h>
 
-#include <sys/printk.h>
+#include <zephyr/sys/printk.h>
 
-#include <pm/device.h>
+#include <zephyr/pm/device.h>
 
-#include <drivers/sensor.h>
-#include <drivers/i2c.h>
+#include <zephyr/drivers/sensor.h>
+#include <zephyr/drivers/i2c.h>
 
-#include <drivers/eeprom.h>
+#include <zephyr/drivers/eeprom.h>
 
 #include <driver_rtc.h>
 
@@ -170,7 +170,7 @@ void displayTime(void*, void*, void*)
     return;
 }
 
-void main(void)
+int main(void)
 {
     //creates a thread with the function processButtons
     struct k_thread displayThreadData;
@@ -180,5 +180,5 @@ void main(void)
 
     printk("in main, threadId: %zu\n", (size_t)displayThreadId);
 
-    return;
+    return 0;
 }

@@ -5,11 +5,12 @@
 #ifndef __CLOCK_GONG_H
 #define __CLOCK_GONG_H
 
-#include <sys/printk.h>
+#include <zephyr/sys/printk.h>
 
-#include <device.h>
-#include <devicetree.h>
-#include <drivers/gpio.h>
+#include <zephyr/kernel.h>
+#include <zephyr/device.h>
+#include <zephyr/devicetree.h>
+#include <zephyr/drivers/gpio.h>
 
 
 class ClockGong

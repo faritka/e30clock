@@ -4,7 +4,7 @@ ClockWatchdog::ClockWatchdog()
 {
     printk("Init Device Watchdog.\n");
 
-    watchdog = device_get_binding(DT_LABEL(DT_INST(0, st_stm32_watchdog)));
+    watchdog = DEVICE_DT_GET(DT_INST(0, st_stm32_watchdog));
     
     if (!watchdog) {
         printk("Device Watchdog IWDT not found.\n");

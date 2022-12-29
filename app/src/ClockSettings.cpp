@@ -34,7 +34,8 @@ const struct device *ClockSettings::getEepromDevice()
 {
     printk("Init Device EEPROM.\n");
 
-    const struct device *eeprom = device_get_binding(DT_LABEL(DT_INST(0, atmel_at24)));
+    //const struct device *eeprom = device_get_binding(DT_LABEL(DT_INST(0, atmel_at24)));
+    const struct device *eeprom = DEVICE_DT_GET(DT_COMPAT_GET_ANY_STATUS_OKAY(atmel_at24));
     
     if (!device_is_ready(eeprom)) {
         printk("Device EEPROM not found.\n");

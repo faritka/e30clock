@@ -5,9 +5,9 @@
 #ifndef __CLOCK_ALARM_H
 #define __CLOCK_ALARM_H
 
-#include <sys/printk.h>
+#include <zephyr/sys/printk.h>
 
-#include <device.h>
+#include <zephyr/device.h>
 
 #include <ClockGong.h>
 #include <ClockSettings.h>

@@ -8,17 +8,17 @@
 
 #define DT_DRV_COMPAT microcrystal_rv3032
 
-#include <zephyr.h>
+#include <zephyr/kernel.h>
 #include <time.h>
-#include <device.h>
-#include <drivers/i2c.h>
-#include <drivers/gpio.h>
-#include <pm/device.h>
-#include <sys/printk.h>
-#include <sys/util.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/i2c.h>
+#include <zephyr/drivers/gpio.h>
+#include <zephyr/pm/device.h>
+#include <zephyr/sys/printk.h>
+#include <zephyr/sys/util.h>
 #include <soc.h>
 
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(rv3032, CONFIG_KERNEL_LOG_LEVEL);
 
 #include <driver_rtc.h>
@@ -62,7 +62,7 @@ LOG_MODULE_REGISTER(rv3032, CONFIG_KERNEL_LOG_LEVEL);
 
 /** @brief Driver config data */
 struct rv3032_config {
-    char *i2c_name;
+    struct i2c_dt_spec i2c;
     //the interrupt pin
     struct gpio_dt_spec int_gpio;
     //CLKOUT enable bit
@@ -77,7 +77,6 @@ struct rv3032_config {
 
 /** @brief Driver instance data */
 struct rv3032_data {
-    const struct device *i2c;
     //the lock while accessing I2C
     struct k_mutex lock;
     //called when there is an interrupt on the interrupt gpio pin

@@ -12,7 +12,7 @@
 #ifndef APP_INCLUDE_DRIVERS_RTC_H_
 #define APP_INCLUDE_DRIVERS_RTC_H_
 
-#include <device.h>
+#include <zephyr/device.h>
 
 #ifdef __cplusplus
 extern "C" {

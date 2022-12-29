@@ -51,7 +51,6 @@
 / {
     ht1632c {
         compatible = "holtek,ht1632c";
-        label = "HT1632C";
         cs-gpios = <&gpioa 8 0>;
         wr-gpios = <&gpioa 9 0>;
         data-gpios = <&gpioa 10 0>;
@@ -62,7 +61,6 @@
 / {
     bmw_thermometer {
         compatible = "bmw,thermometer";
-        label = "BMW E30 Thermometer";
         io-channels = <&adc1 3>;
         enable-gpios = <&gpioa 15 GPIO_ACTIVE_LOW>;
     };
@@ -71,7 +69,6 @@
 / {
     bmw_clock {
         compatible = "bmw,clock";
-        label = "BMW E30 clock";
         background-gpios = <&gpiob 4 0>;
         enable-format-gpios = <&gpiob 1 0>;
         fahrenheit12-gpios = <&gpiob 2 0>;
@@ -81,7 +78,6 @@
 
     bmw_gong {
         compatible = "bmw,gong";
-        label = "BMW E30 gong chimes";
         t1-gpios = <&gpioc 10 0>;
         t2-gpios = <&gpioc 11 0>;
     };
@@ -95,7 +91,6 @@
 
        stm32lrtc@40002800 {
             compatible = "st,stm32lrtc";
-            label = "STM32L_RTC";
             status = "disabled";
             reg = < 0x40002800 0x400 >;
             interrupts = < 0x29 0x0 >;
@@ -113,7 +108,6 @@
 
     veml7700@10 {
         compatible = "vishay,veml7700";
-        label = "VEML7700";
         reg = <0x10>;
         als-gain = <0x00>;
         als-it = <0x01>;
@@ -124,7 +118,6 @@
     eeprom@50 {
         compatible = "atmel,at24";
         reg = <0x50>;
-        label = "EEPROM_0";
         size = <65536>;
         pagesize = <8>;
         address-width = <16>;
@@ -144,7 +137,6 @@
     rv3032@51 {
         compatible = "microcrystal,rv3032";
         reg = <0x51>;
-        label = "RV3032";
         interrupts = < 0x1 0x0 >;
         int-gpios = <&gpioc 3 0>;
         nclke = <0x01>;

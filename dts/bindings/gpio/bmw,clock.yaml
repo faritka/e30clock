@@ -8,8 +8,6 @@ compatible: "bmw,clock"
 include: base.yaml
 
 properties:
-    label:
-      required: true
 
     background-gpios:
       type: phandle-array

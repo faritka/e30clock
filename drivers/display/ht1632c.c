@@ -5,17 +5,8 @@
  */
 #define DT_DRV_COMPAT holtek_ht1632c
 
-#include <device.h>
-#include <drivers/gpio.h>
-#include <sys/byteorder.h>
-#include <drivers/display.h>
-#include <pm/device.h>
-
 #include "ht1632c.h"
 
-#include <sys/printk.h>
-
-#include <logging/log.h>
 LOG_MODULE_REGISTER(display_ht1632c, CONFIG_DISPLAY_LOG_LEVEL);
 
 /**
@@ -48,51 +39,60 @@ static void ht1632c_delay(uint32_t cycles_to_wait)
 /**
  * @brief Sets the CS GPIO pin
  *
- * @param dev Pointer to device data
+ * @param dev Pointer to the device config
+
  * @param int state 1 sets the active state, 0 - inactive (CS is active LOW)
  *
  */
-static void ht1632c_set_cs_pin(struct ht1632c_data *data, int state)
+static void ht1632c_set_cs_pin(const struct device *dev, int state)
 {
-    gpio_pin_set(data->cs_gpio, data->cs_pin, state);
+    const struct ht1632c_config *config = (struct ht1632c_config *)dev->config;
+
+    gpio_pin_set_dt(&config->cs_gpio, state);
 }
 
 /**
  * @brief Sets the WR GPIO pin
  *
- * @param dev Pointer to device data
+ * @param dev Pointer to the device config
  * @param int state 1 sets the active state, 0 - inactive (WR is active LOW)
  *
  */
-static void ht1632c_set_wr_pin(struct ht1632c_data *data, int state)
+static void ht1632c_set_wr_pin(const struct device *dev, int state)
 {
-    gpio_pin_set(data->wr_gpio, data->wr_pin, state);
+    const struct ht1632c_config *config = (struct ht1632c_config *)dev->config;
+
+    gpio_pin_set_dt(&config->wr_gpio, state);
 }
 
 /**
  * @brief Sets the DATA GPIO pin
  *
- * @param dev Pointer to device data
+ * @param dev Pointer to the device config
  * @param int state 1 sets the active state, 0 - inactive (DATA is active HIGH)
  *
  */
-static void ht1632c_set_data_pin(struct ht1632c_data *data, int state)
+static void ht1632c_set_data_pin(const struct device *dev, int state)
 {
-    gpio_pin_set(data->data_gpio, data->data_pin, state);
+    const struct ht1632c_config *config = (struct ht1632c_config *)dev->config;
+
+    gpio_pin_set_dt(&config->data_gpio, state);
 }
 
 /**
  * @brief Writes bits to HT1632C
  *
- * @param dev Pointer to device data
+ * @param dev Pointer to device config
  * @param uint16_t bits Contains the data bits
  * @param uint`6_t bits The first bit from which to write. (If 1, only the last bit will be written. If 8, 8 bits will be written.)
  *
  */
-static void ht1632c_write_bits(struct ht1632c_data *data, 
+static void ht1632c_write_bits(const struct device *dev, 
         uint16_t bits, 
         uint16_t firstbit) 
 {
+    struct ht1632c_data *data = (struct ht1632c_data *)dev->data;
+
     bool state = false;
 
     while(firstbit) {
@@ -103,13 +103,13 @@ static void ht1632c_write_bits(struct ht1632c_data *data,
         }
 
         //set the WR pin low
-        ht1632c_set_wr_pin(data, true);
+        ht1632c_set_wr_pin(dev, true);
         //set the next DATA bit
-        ht1632c_set_data_pin(data, state);
+        ht1632c_set_data_pin(dev, state);
         //wait for the half-clock cycle
         ht1632c_delay(data->delays->su);
         //the next DATA bit is read on WR going from LOW to HIGH
-        ht1632c_set_wr_pin(data, false);
+        ht1632c_set_wr_pin(dev, false);
         //wait the next half-clock cycle
         ht1632c_delay(data->delays->clk);
 
@@ -120,31 +120,33 @@ static void ht1632c_write_bits(struct ht1632c_data *data,
 /**
  * @brief Writes a command to HT1632C
  *
- * @param dev Pointer to device data
+ * @param dev Pointer to device
  * @param uint8_t command Command without the first 3 bits 100
  *
  */
-static void ht1632c_write_command(struct ht1632c_data *data, 
+static void ht1632c_write_command(const struct device *dev, 
         uint8_t command)
 {
+    struct ht1632c_data *data = (struct ht1632c_data *)dev->data;
+
     //CS down
     ht1632c_delay(data->delays->cs);
-    ht1632c_set_cs_pin(data, true);
+    ht1632c_set_cs_pin(dev, true);
     ht1632c_delay(data->delays->su1);
     
     //100 - command mode
-    ht1632c_write_bits(data, HT1632C_COMMAND_HEADER, BIT(2));
+    ht1632c_write_bits(dev, HT1632C_COMMAND_HEADER, BIT(2));
     //the command itself
-    ht1632c_write_bits(data, command, BIT(7));
+    ht1632c_write_bits(dev, command, BIT(7));
     //one extra bit
-    ht1632c_write_bits(data, 0, BIT(0));
+    ht1632c_write_bits(dev, 0, BIT(0));
 
     //set the DATA pin low waiting for the next command
-    ht1632c_set_data_pin(data, false);
+    ht1632c_set_data_pin(dev, false);
 
     //CS UP
     ht1632c_delay(data->delays->h1);
-    ht1632c_set_cs_pin(data, false);
+    ht1632c_set_cs_pin(dev, false);
 }
 
 /**
@@ -178,7 +180,7 @@ static int ht1632c_write(const struct device *dev,
 
     //CS down
     ht1632c_delay(data->delays->cs);
-    ht1632c_set_cs_pin(data, true);
+    ht1632c_set_cs_pin(dev, true);
     ht1632c_delay(data->delays->su1);
     
     //Writing data in the Successive Address Writing Mode
@@ -187,24 +189,24 @@ static int ht1632c_write(const struct device *dev,
     //101-0x00-D0D1D2D3-D0D1D2D3D4...
 
     //101 - write data mode
-    ht1632c_write_bits(data, HT1632C_DATA_HEADER, BIT(2));
+    ht1632c_write_bits(dev, HT1632C_DATA_HEADER, BIT(2));
 
     //start address - 0x00 if the start of the buffer
-    ht1632c_write_bits(data, x, BIT(6));
+    ht1632c_write_bits(dev, x, BIT(6));
 
     for (int i = 0; i < desc->width; i++) {
         if (data->width == 32) {
-            ht1632c_write_bits(data, write_buf8[i], BIT(7));
+            ht1632c_write_bits(dev, write_buf8[i], BIT(7));
         } else if (data->width == 24) {
-            ht1632c_write_bits(data, write_buf16[i], BIT(15));
+            ht1632c_write_bits(dev, write_buf16[i], BIT(15));
         }
     }
 
-    ht1632c_set_data_pin(data, false);
+    ht1632c_set_data_pin(dev, false);
 
     //CS UP
     ht1632c_delay(data->delays->h1);
-    ht1632c_set_cs_pin(data, false);
+    ht1632c_set_cs_pin(dev, false);
 
     return 0;
 }
@@ -239,9 +241,7 @@ static void *ht1632c_get_framebuffer(const struct device *dev)
  */
 static int ht1632c_blanking_off(const struct device *dev)
 {
-    struct ht1632c_data *data = (struct ht1632c_data *)dev->data;
-
-    ht1632c_write_command(data, HT1632_LED_ON);
+    ht1632c_write_command(dev, HT1632_LED_ON);
 
     return 0;
 }
@@ -252,9 +252,7 @@ static int ht1632c_blanking_off(const struct device *dev)
  */
 static int ht1632c_blanking_on(const struct device *dev)
 {
-    struct ht1632c_data *data = (struct ht1632c_data *)dev->data;
-
-    ht1632c_write_command(data, HT1632_LED_OFF);
+    ht1632c_write_command(dev, HT1632_LED_OFF);
 
     return 0;
 }
@@ -272,16 +270,14 @@ static int ht1632c_set_brightness(const struct device *dev,
                 const uint8_t brightness)
 {
     //The PWM level for HT1632C must be 0-15
-    uint8_t pwm_level;
-    struct ht1632c_data *data = (struct ht1632c_data *)dev->data;
-    
+    uint8_t pwm_level;    
     pwm_level = brightness / 16;
 
     if (pwm_level > 15) {
         pwm_level = 15;
     }
 
-    ht1632c_write_command(data, HT1632_PWM + pwm_level);
+    ht1632c_write_command(dev, HT1632_PWM + pwm_level);
 
     return 0;
 }
@@ -332,10 +328,10 @@ static int ht1632c_set_pixel_format(const struct device *dev,
  * Turns on the chip from sleep
  * @param dev Pointer to data structure
  */
-static int ht1632c_exit_sleep(struct ht1632c_data *data)
+static int ht1632c_exit_sleep(const struct device *dev)
 {
-    ht1632c_write_command(data, HT1632_SYS_ON);
-    ht1632c_write_command(data, HT1632_LED_ON);
+    ht1632c_write_command(dev, HT1632_SYS_ON);
+    ht1632c_write_command(dev, HT1632_LED_ON);
 
     k_sleep(K_MSEC(120));
 
@@ -346,10 +342,10 @@ static int ht1632c_exit_sleep(struct ht1632c_data *data)
  * Turns off the chip into sleep
  * @param dev Pointer to data structure
  */
-static int ht1632c_enter_sleep(struct ht1632c_data *data)
+static int ht1632c_enter_sleep(const struct device *dev)
 {
-    ht1632c_write_command(data, HT1632_SYS_DIS);
-    ht1632c_write_command(data, HT1632_LED_OFF);
+    ht1632c_write_command(dev, HT1632_SYS_DIS);
+    ht1632c_write_command(dev, HT1632_LED_OFF);
 
     return 0;
 }
@@ -358,14 +354,13 @@ static int ht1632c_pm_action(const struct device *dev,
         enum pm_device_action action)
 {
     int ret = 0;
-    struct ht1632c_data *data = (struct ht1632c_data *)dev->data;
 
     switch (action) {
     case PM_DEVICE_ACTION_RESUME:
-        ret = ht1632c_exit_sleep(data);
+        ret = ht1632c_exit_sleep(dev);
         break;
     case PM_DEVICE_ACTION_SUSPEND:
-        ret = ht1632c_enter_sleep(data);
+        ret = ht1632c_enter_sleep(dev);
         break;
     default:
         ret = -ENOTSUP;
@@ -386,7 +381,8 @@ static int ht1632c_pm_action(const struct device *dev,
  */
 static int ht1632c_init(const struct device *dev)
 {
-    int err;
+    struct ht1632c_data *data = (struct ht1632c_data *)dev->data;
+    const struct ht1632c_config *config = (struct ht1632c_config *)dev->config;
     uint8_t commons_command;
 
     printk("Configuring HT1632C\n");
@@ -394,9 +390,6 @@ static int ht1632c_init(const struct device *dev)
     printk("Ticks per second %u\n", sys_clock_hw_cycles_per_sec());
 
     printk("Delay %u\n", ht1632c_ns_to_sys_clock_hw_cycles(600));
-
-    struct ht1632c_data *data = (struct ht1632c_data *)dev->data;
-    const struct ht1632c_config *config = (struct ht1632c_config *)dev->config;
 
     data->width = 32;
     data->height = 8;
@@ -418,35 +411,51 @@ static int ht1632c_init(const struct device *dev)
     printk("Delay SU1 %u\n", data->delays->su1);
     printk("Delay H1 %u\n", data->delays->h1);
 
-    data->cs_gpio = device_get_binding(config->cs_gpio_name);
-    __ASSERT(data->cs_gpio != NULL, "Failed to get CS GPIO device");
 
-    err = gpio_pin_configure(data->cs_gpio, config->cs_pin,
-        config->cs_flags | GPIO_OUTPUT_HIGH | GPIO_ACTIVE_LOW);
-    __ASSERT(err == 0, "Failed to configure CS GPIO pin");
+    if (config->cs_gpio.port != NULL) {
+        if (!device_is_ready(config->cs_gpio.port)) {
+            LOG_ERR("CS GPIO device not ready");
+            return -ENODEV;
+        }
 
-    data->wr_gpio = device_get_binding(config->wr_gpio_name);
-    __ASSERT(data->wr_gpio != NULL, "Failed to get WR GPIO device");
+        if (gpio_pin_configure_dt(&config->cs_gpio, GPIO_OUTPUT_HIGH | GPIO_ACTIVE_LOW)) {
+            LOG_ERR("Couldn't configure CS pin");
+            return -EIO;
+        }
+    }
 
-    err = gpio_pin_configure(data->wr_gpio, config->wr_pin,
-        config->wr_flags | GPIO_OUTPUT_HIGH | GPIO_ACTIVE_LOW);
-    __ASSERT(err == 0, "Failed to configure WR GPIO pin");
+    if (config->wr_gpio.port != NULL) {
+        if (!device_is_ready(config->wr_gpio.port)) {
+            LOG_ERR("WR GPIO device not ready");
+            return -ENODEV;
+        }
 
-    data->data_gpio = device_get_binding(config->data_gpio_name);
-    __ASSERT(data->data_gpio != NULL, "Failed to get DATA GPIO device");
+        if (gpio_pin_configure_dt(&config->wr_gpio, GPIO_OUTPUT_HIGH | GPIO_ACTIVE_LOW)) {
+            LOG_ERR("Couldn't configure WR pin");
+            return -EIO;
+        }
+    }
 
-    err = gpio_pin_configure(data->data_gpio, config->data_pin,
-        config->data_flags | GPIO_OUTPUT_LOW | GPIO_ACTIVE_HIGH);
-    __ASSERT(err == 0, "Failed to configure DATA GPIO pin");
+    if (config->data_gpio.port != NULL) {
+        if (!device_is_ready(config->data_gpio.port)) {
+            LOG_ERR("DATA GPIO device not ready");
+            return -ENODEV;
+        }
 
-    data->cs_pin = config->cs_pin;
-    data->wr_pin = config->wr_pin;
-    data->data_pin = config->data_pin;  
+        if (gpio_pin_configure_dt(&config->data_gpio, GPIO_OUTPUT_LOW | GPIO_ACTIVE_HIGH)) {
+            LOG_ERR("Couldn't configure DATA pin");
+            return -EIO;
+        }
+    }
 
-    printk("Sending commands\n");
+    printk("%s: device, GPIO pin %u is ready\n", dev->name, config->cs_gpio.pin);
+    printk("%s: device, GPIO pin %u is ready\n", dev->name, config->wr_gpio.pin);
+    printk("%s: device, GPIO pin %u is ready\n", dev->name, config->data_gpio.pin);
 
-    ht1632c_write_command(data, HT1632_SYS_ON);
-    ht1632c_write_command(data, HT1632_LED_ON);
+    printk("HT1632C sending init commands\n");
+
+    ht1632c_write_command(dev, HT1632_SYS_ON);
+    ht1632c_write_command(dev, HT1632_LED_ON);
 
     //HT1632C can be configured in a 32x8 or 24x16 pattern  
     //and common pad N-MOS open drain output  
@@ -474,7 +483,8 @@ static int ht1632c_init(const struct device *dev)
             data->height = 8;
     }
 
-    ht1632c_write_command(data, commons_command);
+    printk("HT1632C commons command %u\n", commons_command);
+    ht1632c_write_command(dev, commons_command);
 
 #ifdef CONFIG_PM_DEVICE
     data->pm_state = PM_DEVICE_STATE_ACTIVE;
@@ -498,25 +508,24 @@ static const struct display_driver_api ht1632c_api = {
 
 static struct ht1632c_delays ht1632c_delays;
 
-static struct ht1632c_data ht1632c_data = {
-    .delays = &ht1632c_delays
-};
 
-static struct ht1632c_config ht1632c_config = {
-    .cs_gpio_name = DT_INST_GPIO_LABEL(0, cs_gpios),
-    .wr_gpio_name = DT_INST_GPIO_LABEL(0, wr_gpios),
-    .data_gpio_name = DT_INST_GPIO_LABEL(0, data_gpios),
-    .cs_pin = DT_INST_GPIO_PIN(0, cs_gpios),
-    .wr_pin = DT_INST_GPIO_PIN(0, wr_gpios),
-    .data_pin = DT_INST_GPIO_PIN(0, data_gpios),
-    .cs_flags = DT_INST_GPIO_FLAGS(0, cs_gpios),
-    .wr_flags = DT_INST_GPIO_FLAGS(0, wr_gpios),
-    .data_flags = DT_INST_GPIO_FLAGS(0, data_gpios),
-    .commons_options = DT_INST_PROP(0, commons_options)
-};
+#define HT1632C_INIT(inst)                                       \
+static struct ht1632c_config ht1632c_config_ ## inst = {         \
+    .cs_gpio = GPIO_DT_SPEC_INST_GET_OR(inst, cs_gpios, {}),     \
+    .wr_gpio = GPIO_DT_SPEC_INST_GET_OR(inst, wr_gpios, {}),     \
+    .data_gpio = GPIO_DT_SPEC_INST_GET_OR(inst, data_gpios, {}), \
+    .commons_options = DT_INST_PROP(inst, commons_options)       \
+};                                                               \
+                                                                 \
+static struct ht1632c_data ht1632c_data_ ## inst = {             \
+    .delays = &ht1632c_delays                                    \
+};                                                               \
+                                                                 \
+PM_DEVICE_DT_INST_DEFINE(inst, ht1632c_pm_action);               \
+                                                                 \
+DEVICE_DT_INST_DEFINE(inst, &ht1632c_init,                       \
+    PM_DEVICE_DT_INST_REF(inst), &ht1632c_data_ ## inst,         \
+    &ht1632c_config_ ## inst, APPLICATION,                       \
+    CONFIG_APPLICATION_INIT_PRIORITY, &ht1632c_api);             
 
-PM_DEVICE_DT_INST_DEFINE(0, ht1632c_pm_action);
-
-DEVICE_DT_INST_DEFINE(0, &ht1632c_init,
-          PM_DEVICE_DT_INST_REF(0), &ht1632c_data, &ht1632c_config, APPLICATION,
-          CONFIG_APPLICATION_INIT_PRIORITY, &ht1632c_api);
+DT_INST_FOREACH_STATUS_OKAY(HT1632C_INIT)

@@ -23,7 +23,7 @@ ClockLightSensor::ClockLightSensor()
 {
     printk("Init Device VEML.\n");
 
-    sensor = device_get_binding(DT_LABEL(DT_INST(0, vishay_veml7700)));
+    sensor = DEVICE_DT_GET(DT_INST(0, vishay_veml7700));
     
     if (!sensor) {
         printk("Device VEML not found.\n");

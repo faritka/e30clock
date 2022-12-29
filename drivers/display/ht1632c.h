@@ -6,7 +6,16 @@
 #ifndef HT1632C_DISPLAY_DRIVER_H__
 #define HT1632C_DISPLAY_DRIVER_H__
 
-#include <zephyr.h>
+#include <zephyr/kernel.h>
+
+#include <zephyr/device.h>
+#include <zephyr/drivers/gpio.h>
+#include <zephyr/sys/byteorder.h>
+#include <zephyr/drivers/display.h>
+#include <zephyr/pm/device.h>
+#include <zephyr/sys/printk.h>
+#include <zephyr/logging/log.h>
+
 
 // Command header 100
 #define HT1632C_COMMAND_HEADER 0x04
@@ -64,15 +73,9 @@ struct ht1632c_delays {
 
 /** @brief Driver config data */
 struct ht1632c_config {
-    const char *cs_gpio_name;
-    const char *wr_gpio_name;
-    const char *data_gpio_name;
-    gpio_pin_t cs_pin;
-    gpio_pin_t wr_pin;
-    gpio_pin_t data_pin;
-    gpio_dt_flags_t cs_flags;
-    gpio_dt_flags_t wr_flags;
-    gpio_dt_flags_t data_flags;
+    struct gpio_dt_spec cs_gpio;
+    struct gpio_dt_spec wr_gpio;
+    struct gpio_dt_spec data_gpio;
     uint16_t commons_options;
 };
 
@@ -82,18 +85,6 @@ struct ht1632c_data {
     uint16_t width;
     // The screen height in pixels
     uint16_t height;
-    // GPIO used for the CS line
-    const struct device *cs_gpio;
-    // GPIO used for the WR line
-    const struct device *wr_gpio;
-    // GPIO used for the DATA line
-    const struct device *data_gpio;
-    // Pin on gpio used for the CS line
-    gpio_pin_t cs_pin;
-    // Pin on gpio used for the WR line
-    gpio_pin_t wr_pin;
-    // Pin on gpio used for the DATA line
-    gpio_pin_t data_pin;
     // Delays 
     struct ht1632c_delays *delays;
 #ifdef CONFIG_PM_DEVICE

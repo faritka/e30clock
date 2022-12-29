@@ -7,10 +7,10 @@
 #define DT_DRV_COMPAT vishay_veml7700
 
 #include "veml7700.h"
-#include <sys/__assert.h>
-#include <sys/byteorder.h>
-#include <sys/util.h>
-#include <logging/log.h>
+#include <zephyr/sys/__assert.h>
+#include <zephyr/sys/byteorder.h>
+#include <zephyr/sys/util.h>
+#include <zephyr/logging/log.h>
 #include <stdlib.h>
 
 LOG_MODULE_REGISTER(veml7700, CONFIG_SENSOR_LOG_LEVEL);
@@ -18,12 +18,10 @@ LOG_MODULE_REGISTER(veml7700, CONFIG_SENSOR_LOG_LEVEL);
 int veml7700_read(const struct device *dev, uint8_t reg, uint16_t *out)
 {
     const struct veml7700_config *config = dev->config;
-    struct veml7700_data *data = dev->data;
     uint8_t buff[2] = { 0 };
     int ret = 0;
 
-    ret = i2c_write_read(data->i2c, config->i2c_address,
-             &reg, sizeof(reg), buff, sizeof(buff));
+    ret = i2c_write_read_dt(&config->i2c, &reg, sizeof(reg), buff, sizeof(buff));
 
     if (!ret) {
         *out = sys_get_le16(buff);
@@ -35,7 +33,6 @@ int veml7700_read(const struct device *dev, uint8_t reg, uint16_t *out)
 int veml7700_write(const struct device *dev, uint8_t reg, uint16_t value)
 {
     const struct veml7700_config *config = dev->config;
-    struct veml7700_data *data = dev->data;
     struct i2c_msg msg;
     int ret;
     uint8_t buff[3];
@@ -48,7 +45,7 @@ int veml7700_write(const struct device *dev, uint8_t reg, uint16_t value)
     msg.flags = 0;
     msg.len = sizeof(buff);
 
-    ret = i2c_transfer(data->i2c, &msg, 1, config->i2c_address);
+    ret = i2c_transfer_dt(&config->i2c, &msg, 1);
 
     if (ret < 0) {
         LOG_ERR("write block failed");
@@ -154,7 +151,6 @@ static int veml7700_pm_action(const struct device *dev,
 static int veml7700_init(const struct device *dev)
 {
     const struct veml7700_config *config = dev->config;
-    struct veml7700_data *data = dev->data;
     uint16_t conf = 0;
 
     uint16_t tmp, tmp1 = 0;
@@ -162,10 +158,10 @@ static int veml7700_init(const struct device *dev)
     k_msleep(20);
 
     /* Get the I2C device */
-    data->i2c = device_get_binding(config->i2c_name);
-    if (data->i2c == NULL) {
-        LOG_ERR("Could not find I2C device");
-        return -EINVAL;
+    //data->i2c = device_get_binding(config->i2c_name);
+    if (!device_is_ready(config->i2c.bus)) {
+        LOG_ERR("Bus device is not ready");
+        return -ENODEV;
     }
 
 
@@ -225,19 +221,23 @@ static const struct sensor_driver_api veml7700_driver_api = {
     .channel_get = veml7700_channel_get,
 };
 
-static const struct veml7700_config veml7700_config = {
-    .i2c_name = DT_INST_BUS_LABEL(0),
-    .i2c_address = DT_INST_REG_ADDR(0),
-    .als_gain = DT_INST_PROP(0, als_gain),
-    .als_it = DT_INST_PROP(0, als_it),
-    .als_pers = DT_INST_PROP(0, als_pers),
-    .psm = DT_INST_PROP(0, psm),
-};
+#define VEML7700_INIT(inst)                                        \
+static const struct veml7700_config veml7700_config_ ## inst = {   \
+    .i2c = I2C_DT_SPEC_INST_GET(inst),                             \
+    .als_gain = DT_INST_PROP(inst, als_gain),                      \
+    .als_it = DT_INST_PROP(inst, als_it),                          \
+    .als_pers = DT_INST_PROP(inst, als_pers),                      \
+    .psm = DT_INST_PROP(inst, psm),                                \
+};                                                                 \
+                                                                   \
+static struct veml7700_data veml7700_data_ ## inst;                \
+                                                                   \
+PM_DEVICE_DT_INST_DEFINE(inst, veml7700_pm_action);                \
+                                                                   \
+DEVICE_DT_INST_DEFINE(inst, &veml7700_init,                        \
+    PM_DEVICE_DT_INST_REF(inst), &veml7700_data_ ## inst,          \
+    &veml7700_config_ ## inst,                                     \
+    POST_KERNEL, CONFIG_SENSOR_INIT_PRIORITY,                      \
+    &veml7700_driver_api);
 
-static struct veml7700_data veml7700_data;
-
-PM_DEVICE_DT_INST_DEFINE(0, veml7700_pm_action);
-
-DEVICE_DT_INST_DEFINE(0, &veml7700_init,
-          PM_DEVICE_DT_INST_REF(0), &veml7700_data, &veml7700_config,
-          POST_KERNEL, CONFIG_SENSOR_INIT_PRIORITY, &veml7700_driver_api);
+DT_INST_FOREACH_STATUS_OKAY(VEML7700_INIT)

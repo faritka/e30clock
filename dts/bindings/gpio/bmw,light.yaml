@@ -8,8 +8,6 @@ compatible: "bmw,light"
 include: base.yaml
 
 properties:
-    label:
-      required: true
 
     gpios:
       type: phandle-array

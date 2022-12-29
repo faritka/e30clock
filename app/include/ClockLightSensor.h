@@ -5,12 +5,12 @@
 #ifndef __CLOCK_LIGHT_SENSOR_H
 #define __CLOCK_LIGHT_SENSOR_H
 
-#include <sys/printk.h>
+#include <zephyr/sys/printk.h>
 
-#include <device.h>
-#include <devicetree.h>
-#include <drivers/sensor.h>
-#include <drivers/i2c.h>
+#include <zephyr/device.h>
+#include <zephyr/devicetree.h>
+#include <zephyr/drivers/sensor.h>
+#include <zephyr/drivers/i2c.h>
 
 struct ClockLightBrightness {
     //from 0 to 255

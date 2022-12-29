@@ -5,12 +5,12 @@
 #ifndef __CLOCK_BACKGROUND_LIGHT_H
 #define __CLOCK_BACKGROUND_LIGHT_H
 
-#include <sys/printk.h>
+#include <zephyr/sys/printk.h>
 
-#include <device.h>
-#include <devicetree.h>
-#include <drivers/display.h>
-#include <drivers/gpio.h>
+#include <zephyr/device.h>
+#include <zephyr/devicetree.h>
+#include <zephyr/drivers/display.h>
+#include <zephyr/drivers/gpio.h>
 
 #include <ClockDisplay.h>
 

@@ -7,6 +7,7 @@
 
 #include <time.h>
 
+#include <zephyr/sys/printk.h>
 #include <ClockTimeLib.h>
 
 // Constants for TimeChangeRules

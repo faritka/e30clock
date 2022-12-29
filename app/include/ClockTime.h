@@ -9,7 +9,7 @@
 #include <driver_rtc.h>
 #include <stm32_ll_rtc.h>
 
-#include <sys/printk.h>
+#include <zephyr/sys/printk.h>
 
 #include <ClockSettings.h>
 #include <ClockTimeLib.h>

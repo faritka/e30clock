@@ -5,15 +5,15 @@
 #ifndef __CLOCK_SETTINGS_H
 #define __CLOCK_SETTINGS_H
 
-#include <sys/printk.h>
+#include <zephyr/sys/printk.h>
 
-#include <device.h>
-#include <devicetree.h>
+#include <zephyr/device.h>
+#include <zephyr/devicetree.h>
 
-#include <drivers/i2c.h>
-#include <drivers/eeprom.h>
+#include <zephyr/drivers/i2c.h>
+#include <zephyr/drivers/eeprom.h>
 
-#include <drivers/gpio.h>
+#include <zephyr/drivers/gpio.h>
 
 #include <ClockTimezone.h>
 

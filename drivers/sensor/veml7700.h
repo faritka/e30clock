@@ -7,9 +7,9 @@
 #ifndef ZEPHYR_DRIVERS_SENSOR_VEML7700_H_
 #define ZEPHYR_DRIVERS_SENSOR_VEML7700_H_
 
-#include <drivers/sensor.h>
-#include <drivers/i2c.h>
-#include <pm/device.h>
+#include <zephyr/drivers/sensor.h>
+#include <zephyr/drivers/i2c.h>
+#include <zephyr/pm/device.h>
 
 // The slave address (7 bit) is set to 0010000 = 0x10.
 // The least significant bit (LSB) defines read or write mode.
@@ -36,8 +36,7 @@
 #define VEML7700_ALS_SD_MASK BIT(0)
 
 struct veml7700_config {
-    char *i2c_name;
-    uint8_t i2c_address;
+    struct i2c_dt_spec i2c;
     // Ambient light sensor gain selection
     uint8_t als_gain;
     // ALS integration time setting
@@ -49,7 +48,6 @@ struct veml7700_config {
 };
 
 struct veml7700_data {
-    const struct device *i2c;
     struct k_sem sem;
     uint16_t light;
 };

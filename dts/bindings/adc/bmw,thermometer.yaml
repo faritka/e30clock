@@ -8,9 +8,6 @@ compatible: "bmw,thermometer"
 include: base.yaml
 
 properties:
-    label:
-      required: true
-
     io-channels:
       required: true
       description: ADC channel for temperature sensor

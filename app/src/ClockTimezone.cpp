@@ -1,7 +1,5 @@
 #include <ClockTimezone.h>
 
-#include <sys/printk.h>
-
 // Week names for timezone changes
 const char ClockTimezone::weekNames[][6] = {"Last", "First", "Sec", "Third", "Four"};
 

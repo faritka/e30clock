@@ -56,6 +56,7 @@ static int rv3032_pm_action(const struct device *dev,
  */
 static int rv3032_eeprom_read(const struct device *dev, const uint8_t reg_addr, uint8_t *value)
 {
+    const struct rv3032_config *config = (struct rv3032_config *)dev->config;
     struct rv3032_data *data = (struct rv3032_data *)dev->data;
 
     int ret = 0;
@@ -66,7 +67,7 @@ static int rv3032_eeprom_read(const struct device *dev, const uint8_t reg_addr, 
 
     //EERD - EEPROM Memory Refresh Disable bit. When 1, disables the automatic refresh of the
     //Configuration Registers from the EEPROM Memory
-    ret = i2c_reg_read_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_CONTROL1, &control1_register);
+    ret = i2c_reg_read_byte_dt(&config->i2c, RV3032_CONTROL1, &control1_register);
     if (ret != 0) {
         LOG_ERR("read block failed");
         printk("Error reading EERD from RTC\n");
@@ -76,7 +77,7 @@ static int rv3032_eeprom_read(const struct device *dev, const uint8_t reg_addr, 
     
     WRITE_BIT(control1_register, 2, 1);
 
-    i2c_reg_write_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_CONTROL1, control1_register);
+    i2c_reg_write_byte_dt(&config->i2c, RV3032_CONTROL1, control1_register);
     if (ret != 0) {
         LOG_ERR("write block failed");
         printk("Error writing EERD to RTC\n");
@@ -88,7 +89,7 @@ static int rv3032_eeprom_read(const struct device *dev, const uint8_t reg_addr, 
     //by reading EEbusy - EEPROM Memory Busy Status Bit
     while(1) {
         printk("Waiting for EEbusy\n");
-        ret = i2c_reg_read_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_TEMP_LSB, &temperature_lsb_register);
+        ret = i2c_reg_read_byte_dt(&config->i2c, RV3032_TEMP_LSB, &temperature_lsb_register);
         if (ret != 0) {
             LOG_ERR("read block failed");
             printk("Error reading EEbusy from RTC\n");
@@ -103,7 +104,7 @@ static int rv3032_eeprom_read(const struct device *dev, const uint8_t reg_addr, 
         k_msleep(2);
     }
 
-    i2c_reg_write_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_EEADDR, reg_addr);
+    i2c_reg_write_byte_dt(&config->i2c, RV3032_EEADDR, reg_addr);
     if (ret != 0) {
         LOG_ERR("write block failed");
         printk("Error writing EEADDR to RTC\n");
@@ -111,7 +112,7 @@ static int rv3032_eeprom_read(const struct device *dev, const uint8_t reg_addr, 
         return ret;
     }
 
-    i2c_reg_write_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_EECMD, 0x22);
+    i2c_reg_write_byte_dt(&config->i2c, RV3032_EECMD, 0x22);
     if (ret != 0) {
         LOG_ERR("write block failed");
         printk("Error writing EECMD to RTC\n");
@@ -122,7 +123,7 @@ static int rv3032_eeprom_read(const struct device *dev, const uint8_t reg_addr, 
     //t_read = ~1.1 ms.
     k_msleep(2);
     
-    ret = i2c_reg_read_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_EEDATA, value);
+    ret = i2c_reg_read_byte_dt(&config->i2c, RV3032_EEDATA, value);
     if (ret != 0) {
         LOG_ERR("read block failed");
         printk("Error reading EEDATA from RTC\n");
@@ -133,7 +134,7 @@ static int rv3032_eeprom_read(const struct device *dev, const uint8_t reg_addr, 
     //enable auto refresh
     WRITE_BIT(control1_register, 2, 0);
 
-    i2c_reg_write_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_CONTROL1, control1_register);
+    i2c_reg_write_byte_dt(&config->i2c, RV3032_CONTROL1, control1_register);
     if (ret != 0) {
         LOG_ERR("write block failed");
         printk("Error writing EERD to RTC\n");
@@ -154,6 +155,7 @@ static int rv3032_eeprom_read(const struct device *dev, const uint8_t reg_addr, 
  */
 static int rv3032_eeprom_write(const struct device *dev, const uint8_t reg_addr, const uint8_t value)
 {
+    const struct rv3032_config *config = (struct rv3032_config *)dev->config;
     struct rv3032_data *data = (struct rv3032_data *)dev->data;
 
     int ret = 0;
@@ -164,7 +166,7 @@ static int rv3032_eeprom_write(const struct device *dev, const uint8_t reg_addr,
 
     //EERD - EEPROM Memory Refresh Disable bit. When 1, disables the automatic refresh of the
     //Configuration Registers from the EEPROM Memory
-    ret = i2c_reg_read_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_CONTROL1, &control1_register);
+    ret = i2c_reg_read_byte_dt(&config->i2c, RV3032_CONTROL1, &control1_register);
     if (ret != 0) {
         LOG_ERR("read block failed");
         printk("Error reading EERD from RTC\n");
@@ -174,7 +176,7 @@ static int rv3032_eeprom_write(const struct device *dev, const uint8_t reg_addr,
     
     WRITE_BIT(control1_register, 2, 1);
 
-    i2c_reg_write_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_CONTROL1, control1_register);
+    i2c_reg_write_byte_dt(&config->i2c, RV3032_CONTROL1, control1_register);
     if (ret != 0) {
         LOG_ERR("write block failed");
         printk("Error writing EERD to RTC\n");
@@ -186,7 +188,7 @@ static int rv3032_eeprom_write(const struct device *dev, const uint8_t reg_addr,
     //by reading EEbusy - EEPROM Memory Busy Status Bit
     while(1) {
         printk("Waiting for EEbusy\n");
-        ret = i2c_reg_read_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_TEMP_LSB, &temperature_lsb_register);
+        ret = i2c_reg_read_byte_dt(&config->i2c, RV3032_TEMP_LSB, &temperature_lsb_register);
         if (ret != 0) {
             LOG_ERR("read block failed");
             printk("Error reading EEbusy from RTC\n");
@@ -201,7 +203,7 @@ static int rv3032_eeprom_write(const struct device *dev, const uint8_t reg_addr,
         k_msleep(2);
     }
 
-    i2c_reg_write_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_EEADDR, reg_addr);
+    i2c_reg_write_byte_dt(&config->i2c, RV3032_EEADDR, reg_addr);
     if (ret != 0) {
         LOG_ERR("write block failed");
         printk("Error writing EEADDR to RTC\n");
@@ -209,7 +211,7 @@ static int rv3032_eeprom_write(const struct device *dev, const uint8_t reg_addr,
         return ret;
     }
 
-    ret = i2c_reg_write_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_EEDATA, value);
+    ret = i2c_reg_write_byte_dt(&config->i2c, RV3032_EEDATA, value);
     if (ret != 0) {
         LOG_ERR("read block failed");
         printk("Error reading EEDATA from RTC\n");
@@ -217,7 +219,7 @@ static int rv3032_eeprom_write(const struct device *dev, const uint8_t reg_addr,
         return ret;
     }
 
-    i2c_reg_write_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_EECMD, 0x21);
+    i2c_reg_write_byte_dt(&config->i2c, RV3032_EECMD, 0x21);
     if (ret != 0) {
         LOG_ERR("write block failed");
         printk("Error writing EECMD to RTC\n");
@@ -231,7 +233,7 @@ static int rv3032_eeprom_write(const struct device *dev, const uint8_t reg_addr,
     //enable auto refresh
     WRITE_BIT(control1_register, 2, 0);
 
-    i2c_reg_write_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_CONTROL1, control1_register);
+    i2c_reg_write_byte_dt(&config->i2c, RV3032_CONTROL1, control1_register);
     if (ret != 0) {
         LOG_ERR("write block failed");
         printk("Error writing EERD to RTC\n");
@@ -254,12 +256,13 @@ static int rv3032_eeprom_write(const struct device *dev, const uint8_t reg_addr,
 
 static int rv3032_ram_read(const struct device *dev, uint8_t reg_addr, uint8_t *value)
 {
+    const struct rv3032_config *config = (struct rv3032_config *)dev->config;
     struct rv3032_data *data = (struct rv3032_data *)dev->data;
     int ret = 0;
 
     k_mutex_lock(&data->lock, K_FOREVER);
 
-    ret = i2c_reg_read_byte(data->i2c, RV3032_I2C_ADDRESS, reg_addr, value);
+    ret = i2c_reg_read_byte_dt(&config->i2c, reg_addr, value);
     if (ret != 0) {
         LOG_ERR("read register failed");
         printk("Error reading from RAM %u\n", reg_addr);
@@ -283,12 +286,13 @@ static int rv3032_ram_read(const struct device *dev, uint8_t reg_addr, uint8_t *
 
 static int rv3032_ram_write(const struct device *dev, uint8_t reg_addr, uint8_t value)
 {
+    const struct rv3032_config *config = (struct rv3032_config *)dev->config;
     struct rv3032_data *data = (struct rv3032_data *)dev->data;
     int ret = 0;
 
     k_mutex_lock(&data->lock, K_FOREVER);
 
-    ret = i2c_reg_write_byte(data->i2c, RV3032_I2C_ADDRESS, reg_addr, value);
+    ret = i2c_reg_write_byte_dt(&config->i2c, reg_addr, value);
     if (ret != 0) {
         LOG_ERR("Write RAM register failed");
         printk("Error writing to RAM %u\n", reg_addr);
@@ -494,8 +498,11 @@ static int rv3032_stop_calibration(const struct device *dev)
 /**
  * Processes alarms
  */
-static void rv3032_irq_thread(struct rv3032_data *data)
+static void rv3032_irq_thread(const struct device *dev)
 {
+    const struct rv3032_config *config = (struct rv3032_config *)dev->config;
+    struct rv3032_data *data = (struct rv3032_data *)dev->data;
+
     int ret = 0;
     int is_alarm = 0;
     uint8_t status_register;
@@ -510,7 +517,7 @@ static void rv3032_irq_thread(struct rv3032_data *data)
         k_mutex_lock(&data->lock, K_FOREVER);
 
         //AF status. Alarm Flag. Disable it.
-        ret = i2c_reg_read_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_STATUS, &status_register);
+        ret = i2c_reg_read_byte_dt(&config->i2c, RV3032_STATUS, &status_register);
         if (ret != 0) {
             LOG_ERR("read block failed");
             printk("Error reading AF\n");
@@ -527,7 +534,7 @@ static void rv3032_irq_thread(struct rv3032_data *data)
     
             WRITE_BIT(status_register, 3, 0);
 
-            i2c_reg_write_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_STATUS, status_register);
+            i2c_reg_write_byte_dt(&config->i2c, RV3032_STATUS, status_register);
             if (ret != 0) {
                 LOG_ERR("write block failed");
                 printk("Error writing AF to RTC\n");
@@ -540,7 +547,7 @@ static void rv3032_irq_thread(struct rv3032_data *data)
 
         if (is_alarm && (alarm_callback != NULL)) {
             printk("alarm callback is called\n");
-            alarm_callback(data->i2c, data->user_data);
+            alarm_callback(dev, data->user_data);
             printk("alarm callback is finished\n");
         }
 
@@ -558,6 +565,7 @@ static void rv3032_irq_thread(struct rv3032_data *data)
  */
 static int rv3032_get_time(const struct device *dev, struct tm *tm)
 {
+    const struct rv3032_config *config = (struct rv3032_config *)dev->config;
     struct rv3032_data *data = (struct rv3032_data *)dev->data;
     int ret = 0;
     //read starting from the seconds register
@@ -566,7 +574,7 @@ static int rv3032_get_time(const struct device *dev, struct tm *tm)
 
     k_mutex_lock(&data->lock, K_FOREVER);
 
-    ret = i2c_write_read(data->i2c, RV3032_I2C_ADDRESS, &reg, 1, time_buf, sizeof(time_buf));
+    ret = i2c_write_read_dt(&config->i2c, &reg, 1, time_buf, sizeof(time_buf));
 
     if (ret < 0) {
         LOG_ERR("read block failed");
@@ -598,6 +606,7 @@ static int rv3032_get_time(const struct device *dev, struct tm *tm)
  */
 static int rv3032_set_time(const struct device *dev, struct tm *tm)
 {
+    const struct rv3032_config *config = (struct rv3032_config *)dev->config;
     struct rv3032_data *data = (struct rv3032_data *)dev->data;
     int ret = 0;
 
@@ -623,7 +632,7 @@ static int rv3032_set_time(const struct device *dev, struct tm *tm)
 
     k_mutex_lock(&data->lock, K_FOREVER);
 
-    ret = i2c_write(data->i2c, time_buf, sizeof(time_buf), RV3032_I2C_ADDRESS);
+    ret = i2c_write_dt(&config->i2c, time_buf, sizeof(time_buf));
     if (ret < 0) {
         LOG_ERR("write block failed");
         printk("Error writing to RTC\n");
@@ -642,6 +651,7 @@ static int rv3032_set_time(const struct device *dev, struct tm *tm)
 static int rv3032_set_alarm(const struct device *dev, 
     const struct rtc_alarm_cfg *alarm_cfg, struct tm *tm, uint32_t mask)
 {
+    const struct rv3032_config *config = (struct rv3032_config *)dev->config;
     struct rv3032_data *data = (struct rv3032_data *)dev->data;
     int ret = 0;
     uint8_t status_register;
@@ -688,7 +698,7 @@ static int rv3032_set_alarm(const struct device *dev,
 
     //AIE Alarm Interrupt Enable bit.
     //0 - No interrupt signal is generated on INT̅pin when an Alarm event occurs
-    ret = i2c_reg_read_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_CONTROL2, &control2_register);
+    ret = i2c_reg_read_byte_dt(&config->i2c, RV3032_CONTROL2, &control2_register);
     if (ret != 0) {
         LOG_ERR("read block failed");
         printk("Error reading AIE\n");
@@ -698,7 +708,7 @@ static int rv3032_set_alarm(const struct device *dev,
     
     WRITE_BIT(control2_register, 3, 0);
 
-    i2c_reg_write_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_CONTROL2, control2_register);
+    i2c_reg_write_byte_dt(&config->i2c, RV3032_CONTROL2, control2_register);
     if (ret != 0) {
         LOG_ERR("write block failed");
         printk("Error writing AIE to RTC\n");
@@ -707,7 +717,7 @@ static int rv3032_set_alarm(const struct device *dev,
     }
 
     //AF status. Alarm Flag. Disable it.
-    ret = i2c_reg_read_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_STATUS, &status_register);
+    ret = i2c_reg_read_byte_dt(&config->i2c, RV3032_STATUS, &status_register);
     if (ret != 0) {
         LOG_ERR("read block failed");
         printk("Error reading AF\n");
@@ -717,7 +727,7 @@ static int rv3032_set_alarm(const struct device *dev,
     
     WRITE_BIT(status_register, 3, 0);
 
-    i2c_reg_write_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_STATUS, status_register);
+    i2c_reg_write_byte_dt(&config->i2c, RV3032_STATUS, status_register);
     if (ret != 0) {
         LOG_ERR("write block failed");
         printk("Error writing AF to RTC\n");
@@ -726,7 +736,7 @@ static int rv3032_set_alarm(const struct device *dev,
     }
 
     //write in the Minutes Alarm register
-    i2c_reg_write_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_MINUTES_ALARM, minutes_alarm);
+    i2c_reg_write_byte_dt(&config->i2c, RV3032_MINUTES_ALARM, minutes_alarm);
     if (ret != 0) {
         LOG_ERR("write block failed");
         printk("Error writing minutes alarm to RTC\n");
@@ -735,7 +745,7 @@ static int rv3032_set_alarm(const struct device *dev,
     }
 
     //write in the Hours Alarm register
-    i2c_reg_write_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_HOURS_ALARM, hours_alarm);
+    i2c_reg_write_byte_dt(&config->i2c, RV3032_HOURS_ALARM, hours_alarm);
     if (ret != 0) {
         LOG_ERR("write block failed");
         printk("Error writing hours alarm to RTC\n");
@@ -744,7 +754,7 @@ static int rv3032_set_alarm(const struct device *dev,
     }
     
     //write in the Date Alarm register
-    i2c_reg_write_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_DATE_ALARM, date_alarm);
+    i2c_reg_write_byte_dt(&config->i2c, RV3032_DATE_ALARM, date_alarm);
     if (ret != 0) {
         LOG_ERR("write block failed");
         printk("Error writing date alarm to RTC\n");
@@ -754,7 +764,7 @@ static int rv3032_set_alarm(const struct device *dev,
 
     WRITE_BIT(control2_register, 3, 1);
 
-    i2c_reg_write_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_CONTROL2, control2_register);
+    i2c_reg_write_byte_dt(&config->i2c, RV3032_CONTROL2, control2_register);
     if (ret != 0) {
         LOG_ERR("write block failed");
         printk("Error writing AIE to RTC\n");
@@ -773,6 +783,7 @@ static int rv3032_set_alarm(const struct device *dev,
 
 static int rv3032_cancel_alarm(const struct device *dev)
 {
+    const struct rv3032_config *config = (struct rv3032_config *)dev->config;
     struct rv3032_data *data = (struct rv3032_data *)dev->data;
     int ret = 0;
     uint8_t control2_register;
@@ -783,7 +794,7 @@ static int rv3032_cancel_alarm(const struct device *dev)
 
     //AIE Alarm Interrupt Enable bit.
     //0 - No interrupt signal is generated on INT̅pin when an Alarm event occurs
-    ret = i2c_reg_read_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_CONTROL2, &control2_register);
+    ret = i2c_reg_read_byte_dt(&config->i2c, RV3032_CONTROL2, &control2_register);
     if (ret != 0) {
         LOG_ERR("read block failed");
         printk("Error reading AIE\n");
@@ -793,7 +804,7 @@ static int rv3032_cancel_alarm(const struct device *dev)
     
     WRITE_BIT(control2_register, 3, 0);
 
-    i2c_reg_write_byte(data->i2c, RV3032_I2C_ADDRESS, RV3032_CONTROL2, control2_register);
+    i2c_reg_write_byte_dt(&config->i2c, RV3032_CONTROL2, control2_register);
     if (ret != 0) {
         LOG_ERR("write block failed");
         printk("Error writing AIE to RTC\n");
@@ -870,7 +881,7 @@ int rv3032_irq_config(const struct device *dev)
     //creates a thread to process an alarm. It gets the signal from the IRQ function.
     k_thread_create(&data->irq_thread, data->irq_thread_stack,
         RV3032_IRQ_THREAD_STACK_SIZE,
-        (k_thread_entry_t)rv3032_irq_thread, data, NULL, NULL,
+        (k_thread_entry_t)rv3032_irq_thread, (void *)dev, NULL, NULL,
         K_PRIO_COOP(2),
         0, K_NO_WAIT);
 
@@ -894,10 +905,10 @@ static int rv3032_init(const struct device *dev)
     k_mutex_init(&data->lock);
 
     /* Get the I2C device */
-    data->i2c = device_get_binding(config->i2c_name);
-    if (data->i2c == NULL) {
-        LOG_ERR("Could not find I2C device");
-        return -EINVAL;
+    if (!device_is_ready(config->i2c.bus)) {
+        LOG_ERR("Bus device is not ready");
+        printk("RV3032 I2C is not ready");
+        return -ENODEV;
     }
 
     printk("RV-3032 was found\n");
@@ -948,19 +959,23 @@ static const struct rtc_driver_api rv3032_api = {
     .stop_calibration = rv3032_stop_calibration,
 };
 
-static struct rv3032_data rv3032_data = {};
+#define RV3032_INIT(inst)                                        \
+static struct rv3032_data rv3032_data_ ## inst = {};             \
+                                                                 \
+static struct rv3032_config rv3032_config_ ## inst = {           \
+    .i2c = I2C_DT_SPEC_INST_GET(inst),                           \
+    .int_gpio = GPIO_DT_SPEC_INST_GET_OR(inst, int_gpios, {0}),  \
+    .nclke = DT_INST_PROP(inst, nclke),                          \
+    .bsm = DT_INST_PROP(inst, bsm),                              \
+    .tcm = DT_INST_PROP(inst, tcm),                              \
+    .tcr = DT_INST_PROP(inst, tcr),                              \
+};                                                               \
+                                                                 \
+PM_DEVICE_DT_INST_DEFINE(inst, rv3032_pm_action);                \
+                                                                 \
+DEVICE_DT_INST_DEFINE(inst, &rv3032_init,                        \
+    PM_DEVICE_DT_INST_REF(inst), &rv3032_data_ ## inst,          \
+    &rv3032_config_ ## inst, APPLICATION,                        \
+    CONFIG_APPLICATION_INIT_PRIORITY, &rv3032_api);
 
-static struct rv3032_config rv3032_config = {
-    .i2c_name = DT_INST_BUS_LABEL(0),
-    .int_gpio = GPIO_DT_SPEC_INST_GET_OR(0, int_gpios, { 0 }),
-    .nclke = DT_INST_PROP(0, nclke),
-    .bsm = DT_INST_PROP(0, bsm),
-    .tcm = DT_INST_PROP(0, tcm),
-    .tcr = DT_INST_PROP(0, tcr),
-};
-
-PM_DEVICE_DT_INST_DEFINE(0, rv3032_pm_action);
-
-DEVICE_DT_INST_DEFINE(0, &rv3032_init,
-          PM_DEVICE_DT_INST_REF(0), &rv3032_data, &rv3032_config, APPLICATION,
-          CONFIG_APPLICATION_INIT_PRIORITY, &rv3032_api);
+DT_INST_FOREACH_STATUS_OKAY(RV3032_INIT)

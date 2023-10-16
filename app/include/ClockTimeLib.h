@@ -25,7 +25,7 @@ class ClockTimeLib
         /**
          * Checks if the year is leap
          */
-        static bool isLeapYear(uint16_t year)
+        static bool isLeapYear(uint32_t year)
         {
             year = 1900 + year;
 

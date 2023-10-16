@@ -27,7 +27,7 @@ class ClockTime
         /**
          * Gets the time from the RTC device
          */
-        int getRtcTime();
+        int64_t getRtcTime();
 
         /**
          * Sets the time into the RTC device
@@ -59,7 +59,7 @@ class ClockTime
             tm.tm_mon = month - 1;
         }
 
-        void setYear(uint16_t year)
+        void setYear(uint32_t year)
         {
             tm.tm_year = year - 1900;
         }
@@ -133,7 +133,7 @@ class ClockTime
         }
 
 
-        uint16_t getYear() 
+        uint32_t getYear() 
         {
             return (tm.tm_year + 1900); 
         }
@@ -161,6 +161,31 @@ class ClockTime
 
         //Sets the alarm interrupt
         void setAlarmInterrupt();
+
+
+        /**
+         * Checks if the local standard to DST change time is within 1 hour from the supplied time
+         * It's necessary if we need to set new time on a DST day.
+         */
+        inline bool isStartDstWithinOneHourLocal(int64_t currentTime)
+        {
+            printk("isStartDstWithinOneHour %lld\n", currentTime);
+
+            printk("timezone.getStartDst: %lld\n", timezone.getStartDst());
+
+            printk("timezone.getStartDst + 1 hour: %lld\n", timezone.getStartDst() + 1 * 60 * 60);
+
+            return (((currentTime >= timezone.getStartDst()) && (currentTime <= (timezone.getStartDst() + 1 * 60 * 60))) ? true : false);
+        }
+
+        /**
+         * Checks if the local DST to Standard change time is within 1 hour from the supplied time
+         * It's necessary if we need to set new time on a DST day.
+         */
+        inline bool isStartStdWithinOneHourLocal(int64_t currentTime)
+        {
+            return (((currentTime >= timezone.getStartStd()) && (currentTime <= (timezone.getStartStd() + 1 * 60 * 60))) ? true : false);
+        }
 
     private:
         //the RTC device

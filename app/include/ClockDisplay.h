@@ -139,6 +139,9 @@ class ClockDisplay
         //saves the current thread ID
         k_tid_t threadId;
 
+        //the previous operating mode of the display: time, date, temperature
+        uint8_t previousMode = 0;
+
         //the background light sensor interrupt data
         static struct gpio_callback backgroundLightCallbackData;
 

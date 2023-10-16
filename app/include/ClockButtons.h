@@ -41,6 +41,21 @@ class ClockButtons
          */
         static struct k_fifo pressedButtons;
 
+        /**
+         * The last time a button was pressed. For debouncing
+         */
+        static int64_t lastPressedButtonTime;
+
+        /**
+         * The last pressed button ID
+         */
+        static uint8_t lastPressedButtonId;
+
+        /**
+         * The debouncer delay interval to wait for the next press in ms
+         */
+        static const uint16_t debouncerDelay = 50;
+
         ClockSettings *clockSettings;
 
         ClockTime *clockTime;
@@ -62,6 +77,24 @@ class ClockButtons
         static struct gpio_callback memoButtonCallbackData;
         static struct gpio_callback tempButtonCallbackData;
 
+        /**
+         * The debouncer function
+         */
+        static inline int buttonDebouncer(const uint8_t pressedButtonId) 
+        {
+            int result = 0;
+            int64_t pressedButtonTime = k_uptime_get();
+
+            if ((pressedButtonId == lastPressedButtonId) && ((pressedButtonTime - debouncerDelay) <= lastPressedButtonTime)) {
+                result = 1;
+            }
+
+            lastPressedButtonTime = pressedButtonTime;
+            lastPressedButtonId = pressedButtonId;
+
+            return result;
+        }
+
         int initButtonInterrupt(const struct gpio_dt_spec *button, struct gpio_callback *callback, 
             gpio_callback_handler_t callbackFunction);
 
@@ -69,6 +102,12 @@ class ClockButtons
         {
             struct pressedButton eventPressedButton;
             eventPressedButton.id = hButtonId;
+
+            if (buttonDebouncer(eventPressedButton.id)) {
+                printk("The button was debounced, ID: %u\n", eventPressedButton.id);
+                return;
+            }
+
             k_fifo_put(&pressedButtons, &eventPressedButton);
             printk("Button pressed: %s, pins: %zu, ID: %u\n", dev->name, pins, eventPressedButton.id);
         }
@@ -77,6 +116,12 @@ class ClockButtons
         {
             struct pressedButton eventPressedButton;
             eventPressedButton.id = minButtonId;
+
+            if (buttonDebouncer(eventPressedButton.id)) {
+                printk("The button was debounced, ID: %u\n", eventPressedButton.id);
+                return;
+            }
+
             k_fifo_put(&pressedButtons, &eventPressedButton);
             printk("Button pressed: %s, pins: %zu, ID: %u\n", dev->name, pins, eventPressedButton.id);
         }
@@ -85,6 +130,12 @@ class ClockButtons
         {
             struct pressedButton eventPressedButton;
             eventPressedButton.id = hourButtonId;
+
+            if (buttonDebouncer(eventPressedButton.id)) {
+                printk("The button was debounced, ID: %u\n", eventPressedButton.id);
+                return;
+            }
+
             k_fifo_put(&pressedButtons, &eventPressedButton);
             printk("Button pressed: %s, pins: %zu, ID: %u\n", dev->name, pins, eventPressedButton.id);
         }
@@ -93,6 +144,12 @@ class ClockButtons
         {
             struct pressedButton eventPressedButton;
             eventPressedButton.id = dateButtonId;
+
+            if (buttonDebouncer(eventPressedButton.id)) {
+                printk("The button was debounced, ID: %u\n", eventPressedButton.id);
+                return;
+            }
+
             k_fifo_put(&pressedButtons, &eventPressedButton);
             printk("Button pressed: %s, pins: %zu, ID: %u\n", dev->name, pins, eventPressedButton.id);
         }
@@ -101,6 +158,12 @@ class ClockButtons
         {
             struct pressedButton eventPressedButton;
             eventPressedButton.id = memoButtonId;
+
+            if (buttonDebouncer(eventPressedButton.id)) {
+                printk("The button was debounced, ID: %u\n", eventPressedButton.id);
+                return;
+            }
+
             k_fifo_put(&pressedButtons, &eventPressedButton);
             printk("Button pressed: %s, pins: %zu, ID: %u\n", dev->name, pins, eventPressedButton.id);
         }
@@ -109,6 +172,12 @@ class ClockButtons
         {
             struct pressedButton eventPressedButton;
             eventPressedButton.id = tempButtonId;
+
+            if (buttonDebouncer(eventPressedButton.id)) {
+                printk("The button was debounced, ID: %u\n", eventPressedButton.id);
+                return;
+            }
+
             k_fifo_put(&pressedButtons, &eventPressedButton);
             printk("Button pressed: %s, pins: %zu, ID: %u\n", dev->name, pins, eventPressedButton.id);
         }
@@ -125,6 +194,10 @@ class ClockButtons
 
         void memoButtonProcess(void);
 
+        /**
+         * Process the hour changing buttons
+         */
+        void processHourChange();
 };
 
 #endif

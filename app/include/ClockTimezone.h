@@ -37,29 +37,29 @@ struct TimeChangeRule
 class ClockTimezone 
 {
     public:
-        ClockTimezone(TimeChangeRule *dstRule, TimeChangeRule *stdRule, uint16_t year);
+        ClockTimezone(TimeChangeRule *dstRule, TimeChangeRule *stdRule, uint32_t year);
 
-        void setRules(TimeChangeRule *dstRule, TimeChangeRule *stdRule, uint16_t year);
+        void setRules(TimeChangeRule *dstRule, TimeChangeRule *stdRule, uint32_t year);
 
         /**
          * Converts the UTC UNIX time to the local time
          */
-        int64_t toLocal(int64_t utc, uint16_t year);
+        int64_t toLocal(int64_t utc, uint32_t year);
 
         /**
          * Checks if the UTC time is inside the daylight saving interval or not
          */
-        bool isDstUtc(int64_t utc, uint16_t year);
+        bool isDstUtc(int64_t utc, uint32_t year);
 
         /**
          * Converts the local time to the UTC UNIX time
          */
-        int64_t toUtc(int64_t local, uint16_t year);
+        int64_t toUtc(int64_t local, uint32_t year);
 
         /**
          * Checks if the local time is inside the daylight saving interval or not
          */
-        bool isDstLocal(int64_t local, uint16_t year);
+        bool isDstLocal(int64_t local, uint32_t year);
 
 
         /**
@@ -303,9 +303,25 @@ class ClockTimezone
             return (offsets[offsetNumber]);
         }
 
+        /**
+         * Gets the the start time of DST
+         */
+        inline const int64_t getStartDst()
+        {
+            return startDst;
+        }
+
+        /**
+         * Gets the the start time of the Standard time
+         */
+        inline const int64_t getStartStd()
+        {
+            return startStd;
+        }
+
     private:
         //the current year
-        uint16_t year;
+        uint32_t year;
 
         //the daylight saving start rule
         TimeChangeRule *dstRule;

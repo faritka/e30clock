@@ -18,14 +18,14 @@ const int ClockTimezone::offsets[] = {-720, -660, -600, -570, -540, -480, -420, 
  * 
  * Create a ClockTimezone object from the given time change rules. 
  */
-ClockTimezone::ClockTimezone(TimeChangeRule *dstRule, TimeChangeRule *stdRule, uint16_t year)
+ClockTimezone::ClockTimezone(TimeChangeRule *dstRule, TimeChangeRule *stdRule, uint32_t year)
 {
     this->year = 2021;
     setRules(dstRule, stdRule, year);
 }
 
 
-void ClockTimezone::setRules(TimeChangeRule *dstRule, TimeChangeRule *stdRule, uint16_t year)
+void ClockTimezone::setRules(TimeChangeRule *dstRule, TimeChangeRule *stdRule, uint32_t year)
 {
     this->dstRule = dstRule;
     this->stdRule = stdRule;
@@ -58,7 +58,7 @@ void ClockTimezone::calculateTimeChange()
 int64_t ClockTimezone::mktime(const TimeChangeRule *rule)
 {
     int64_t t = 0;
-    uint16_t tmpYear = year;
+    uint32_t tmpYear = year;
 
     // temp copies of r.month and r.week
     uint8_t month = rule->month;
@@ -98,7 +98,7 @@ int64_t ClockTimezone::mktime(const TimeChangeRule *rule)
     return t;
 }
 
-int64_t ClockTimezone::toLocal(int64_t utc, uint16_t year)
+int64_t ClockTimezone::toLocal(int64_t utc, uint32_t year)
 {
     // If the year has changed, calculate new time change periods
     if (year != this->year) {
@@ -113,7 +113,7 @@ int64_t ClockTimezone::toLocal(int64_t utc, uint16_t year)
     }
 }
 
-int64_t ClockTimezone::toUtc(int64_t local, uint16_t year)
+int64_t ClockTimezone::toUtc(int64_t local, uint32_t year)
 {
     // If the year has changed, calculate new time change periods
     if (year != this->year) {
@@ -128,7 +128,7 @@ int64_t ClockTimezone::toUtc(int64_t local, uint16_t year)
     }
 }
 
-bool ClockTimezone::isDstUtc(int64_t utc, uint16_t year)
+bool ClockTimezone::isDstUtc(int64_t utc, uint32_t year)
 {
     // If the year has changed, calculate new time change periods
     if (year != this->year) {
@@ -148,7 +148,7 @@ bool ClockTimezone::isDstUtc(int64_t utc, uint16_t year)
     }
 }
 
-bool ClockTimezone::isDstLocal(int64_t local, uint16_t year)
+bool ClockTimezone::isDstLocal(int64_t local, uint32_t year)
 {
     // If the year has changed, calculate new time change periods
     if (year != this->year) {

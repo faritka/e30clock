@@ -33,7 +33,7 @@ int64_t ClockTimeLib::mktime(struct tm *tm)
 void ClockTimeLib::gmtime(int64_t timeInput, struct tm *tm)
 {
     //unix time starts from 1970, tm->tm_year from 1900
-    uint16_t year = 70;
+    uint32_t year = 70;
     uint8_t month, monthLength;
     int64_t time = 0;
     uint32_t days = 0;

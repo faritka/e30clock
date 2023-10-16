@@ -51,7 +51,7 @@ ClockTime::ClockTime(ClockSettings *clockSettings)
     getRtcTime();
 };
 
-int ClockTime::getRtcTime()
+int64_t ClockTime::getRtcTime()
 {
     printk("Getting time\n");
     
@@ -79,7 +79,7 @@ int ClockTime::getRtcTime()
 
     printk(", Date: %.2d-%.2d-%.2d\n", tm.tm_year, tm.tm_mon, tm.tm_mday);
 
-    return 0;
+    return currentTimeLocal;
 }
 
 

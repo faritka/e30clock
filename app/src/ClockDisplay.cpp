@@ -81,6 +81,13 @@ void ClockDisplay::show(bool showTitle)
         printk("displayStr: %s\n", displayStr);
         drawString(displayStr);
     } else if (mode == modeYear) {
+        //skip double show of the screen
+        if (showTitle && (previousMode == modeYear)) {
+            printk("Double year screen protection\n");
+            return;
+        }
+        previousMode = modeYear;
+
         clearScreen();
 
         if (showTitle) {
@@ -231,7 +238,7 @@ void ClockDisplay::show(bool showTitle)
         drawString(displayStr);
     } else if (mode == modeCorrectionOffset) {
         if (showTitle) {
-            drawStringScrolling("Time Correction Offset (+ faster or - slower)");
+            drawStringScrolling("Time Correction Offset (+ slower or - faster)");
         }
 
         clearScreen();
@@ -258,7 +265,7 @@ void ClockDisplay::show(bool showTitle)
         drawString(displayStr);
     }
 
-
+    previousMode = mode;
 }
 
 void ClockDisplay::render()

@@ -1,5 +1,8 @@
 #include <ClockButtons.h>
 
+int64_t ClockButtons::lastPressedButtonTime = 0;
+uint8_t ClockButtons::lastPressedButtonId = 0;
+
 gpio_callback ClockButtons::hButtonCallbackData;
 gpio_callback ClockButtons::minButtonCallbackData;
 gpio_callback ClockButtons::hourButtonCallbackData;
@@ -123,17 +126,32 @@ void ClockButtons::minButtonProcess(void)
 
         printk("In minButtonProcess Time: %.2d:%.2d:%.2d\n", clockTime->getHour(), clockTime->getMinute(), clockTime->getSecond());
     } else if (clockDisplay->getMode() == ClockDisplay::modeHour) {
+        processHourChange();
+/*
         //get the current time
-        clockTime->getRtcTime();
+        uint64_t currentTimeLocal = clockTime->getRtcTime();
 
         uint8_t hour = clockTime->getHour();
 
-        clockTime->setHour((hour < 23) ? hour + 1 : 0);
+        hour = (hour < 23) ? hour + 1 : 0;
+
+        //check if it's a day when Standard time changes to DST
+        //then instead of changing from 1:00 to 2:00, change to 3:00
+        if (clockTime->isStartDstWithinOneHourLocal(currentTimeLocal)) {
+            hour += 1;
+        }
+
+        if (clockTime->isStartStdWithinOneHourLocal(currentTimeLocal)) {
+            hour -= 1;
+        }
+
+        clockTime->setHour(hour);
 
         //write the new time to RTC
         clockTime->setRtcTime();
 
         printk("In minButtonProcess Time: %.2d:%.2d:%.2d\n", clockTime->getHour(), clockTime->getMinute(), clockTime->getSecond());
+*/
     } else if (clockDisplay->getMode() == ClockDisplay::modeYear) {
         //get the current time
         clockTime->getRtcTime();
@@ -374,6 +392,8 @@ void ClockButtons::hButtonProcess(void)
 {
     switch (clockDisplay->getMode()) {
         case ClockDisplay::modeTime: {
+            processHourChange();
+/*
             //get the current time
             clockTime->getRtcTime();
 
@@ -385,7 +405,7 @@ void ClockButtons::hButtonProcess(void)
             clockTime->setRtcTime();
 
             printk("In hButtonProcess Time: %.2d:%.2d:%.2d\n", clockTime->getHour(), clockTime->getMinute(), clockTime->getSecond());
-
+*/
             break;
         }
         //switches the display menu
@@ -486,3 +506,27 @@ void ClockButtons::memoButtonProcess(void)
 }
 
 
+void ClockButtons::processHourChange()
+{
+    //get the current time
+    uint64_t currentTimeLocal = clockTime->getRtcTime();
+
+    uint8_t hour = clockTime->getHour();
+
+    hour = (hour < 23) ? hour + 1 : 0;
+
+    //check if it's a day when Standard time changes to DST
+    //then instead of changing from 1:00 to 2:00, change to 3:00
+    if (clockTime->isStartDstWithinOneHourLocal(currentTimeLocal + 1 * 60 * 60)) {
+        printk("Starting DST withing 1 hour\n");
+        hour += 1;
+    }
+
+    clockTime->setHour(hour);
+
+    //write the new time to RTC
+    clockTime->setRtcTime();
+
+    printk("In minButtonProcess Time: %.2d:%.2d:%.2d\n", clockTime->getHour(), clockTime->getMinute(), clockTime->getSecond());
+
+}
